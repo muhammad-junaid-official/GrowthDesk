@@ -6,12 +6,15 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { SiteExplorerView } from '@/components/site-explorer/SiteExplorerView';
 import { KeywordExplorerView } from '@/components/keyword-explorer/KeywordExplorerView';
 import { SiteAuditView } from '@/components/site-audit/SiteAuditView';
+import { SearchConsoleView } from '@/components/search-console/SearchConsoleView';
 import { SettingsView } from '@/components/settings/SettingsView';
 import { AIAssistantDrawer } from '@/components/ai-assistant/AIAssistantDrawer';
-import { DomainMetrics, KeywordData, TechnicalAuditData } from '@/types/seo';
+import { DomainMetrics, KeywordData, TechnicalAuditData, GscData } from '@/types/seo';
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<'site-explorer' | 'keyword-explorer' | 'site-audit' | 'settings'>('site-explorer');
+  const [activeTab, setActiveTab] = useState<
+    'site-explorer' | 'keyword-explorer' | 'site-audit' | 'search-console' | 'settings'
+  >('site-explorer');
   const [searchQuery, setSearchQuery] = useState('vercel.com');
   const [selectedCountry, setSelectedCountry] = useState('US');
   const [isAiOpen, setIsAiOpen] = useState(false);
@@ -20,11 +23,13 @@ export default function DashboardPage() {
   const [domainData, setDomainData] = useState<DomainMetrics | null>(null);
   const [keywordData, setKeywordData] = useState<KeywordData | null>(null);
   const [auditData, setAuditData] = useState<TechnicalAuditData | null>(null);
+  const [gscData, setGscData] = useState<GscData | null>(null);
 
   // Loading states
   const [domainLoading, setDomainLoading] = useState(false);
   const [keywordLoading, setKeywordLoading] = useState(false);
   const [auditLoading, setAuditLoading] = useState(false);
+  const [gscLoading, setGscLoading] = useState(false);
 
   // Stored Keys
   const [apiKeys, setApiKeys] = useState<{
@@ -51,11 +56,12 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // Fetch initial domain data on load
+  // Fetch initial domain and GSC data on load
   useEffect(() => {
     fetchDomainData('vercel.com');
     fetchKeywordData('nextjs seo', 'US');
     fetchAuditData('https://vercel.com');
+    fetchGscData('vercel.com');
   }, []);
 
   const fetchDomainData = async (domain: string) => {
@@ -117,6 +123,21 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchGscData = async (domain: string) => {
+    setGscLoading(true);
+    try {
+      const res = await fetch(`/api/search-console?domain=${encodeURIComponent(domain)}`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        setGscData(json.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch GSC data:', err);
+    } finally {
+      setGscLoading(false);
+    }
+  };
+
   const handleSearch = (query: string, country?: string) => {
     setSearchQuery(query);
     if (activeTab === 'site-explorer') {
@@ -125,6 +146,8 @@ export default function DashboardPage() {
       fetchKeywordData(query, country || selectedCountry);
     } else if (activeTab === 'site-audit') {
       fetchAuditData(query);
+    } else if (activeTab === 'search-console') {
+      fetchGscData(query);
     }
   };
 
@@ -140,6 +163,7 @@ export default function DashboardPage() {
     if (activeTab === 'site-explorer') return domainData?.domain || searchQuery;
     if (activeTab === 'keyword-explorer') return keywordData?.keyword || searchQuery;
     if (activeTab === 'site-audit') return auditData?.url || searchQuery;
+    if (activeTab === 'search-console') return gscData?.domain || searchQuery;
     return searchQuery;
   };
 
@@ -147,6 +171,7 @@ export default function DashboardPage() {
     if (activeTab === 'site-explorer') return domainData;
     if (activeTab === 'keyword-explorer') return keywordData;
     if (activeTab === 'site-audit') return auditData;
+    if (activeTab === 'search-console') return gscData;
     return null;
   };
 
@@ -160,6 +185,7 @@ export default function DashboardPage() {
           if (tab === 'site-explorer') setSearchQuery(domainData?.domain || 'vercel.com');
           if (tab === 'keyword-explorer') setSearchQuery(keywordData?.keyword || 'nextjs seo');
           if (tab === 'site-audit') setSearchQuery(auditData?.url || 'https://vercel.com');
+          if (tab === 'search-console') setSearchQuery(gscData?.domain || 'vercel.com');
         }}
         searchQuery={searchQuery}
         onSearch={handleSearch}
@@ -178,6 +204,7 @@ export default function DashboardPage() {
             if (tab === 'site-explorer') setSearchQuery(domainData?.domain || 'vercel.com');
             if (tab === 'keyword-explorer') setSearchQuery(keywordData?.keyword || 'nextjs seo');
             if (tab === 'site-audit') setSearchQuery(auditData?.url || 'https://vercel.com');
+            if (tab === 'search-console') setSearchQuery(gscData?.domain || 'vercel.com');
           }}
           onOpenAi={() => setIsAiOpen(true)}
         />
@@ -208,6 +235,15 @@ export default function DashboardPage() {
               loading={auditLoading}
               onRefresh={() => fetchAuditData(searchQuery)}
               onAskAiAboutAudit={() => setIsAiOpen(true)}
+            />
+          )}
+
+          {activeTab === 'search-console' && (
+            <SearchConsoleView
+              data={gscData}
+              loading={gscLoading}
+              onRefresh={() => fetchGscData(searchQuery)}
+              onAskAi={() => setIsAiOpen(true)}
             />
           )}
 

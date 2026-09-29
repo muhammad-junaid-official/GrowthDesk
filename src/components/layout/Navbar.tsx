@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Search, Globe, Sparkles, SlidersHorizontal, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 
 interface NavbarProps {
-  activeTab: 'site-explorer' | 'keyword-explorer' | 'site-audit' | 'settings';
+  activeTab: 'site-explorer' | 'keyword-explorer' | 'site-audit' | 'search-console' | 'settings';
   onTabChange: (tab: any) => void;
   searchQuery: string;
   onSearch: (query: string, country?: string) => void;
@@ -51,6 +51,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         return 'Enter seed keyword (e.g. nextjs seo, ai marketing)...';
       case 'site-audit':
         return 'Enter website URL to audit (e.g. https://example.com)...';
+      case 'search-console':
+        return 'Enter verified domain (e.g. vercel.com)...';
       default:
         return 'Search across GrowthDesk...';
     }

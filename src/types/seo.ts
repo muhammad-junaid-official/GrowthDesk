@@ -146,3 +146,31 @@ export interface ApiConfig {
   googlePageSpeedApiKey?: string;
   openAiApiKey?: string;
 }
+
+export interface GscQueryItem {
+  query: string;
+  clicks: number;
+  impressions: number;
+  ctr: number; // percentage
+  position: number;
+}
+
+export interface GscPageItem {
+  page: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+}
+
+export interface GscData {
+  domain: string;
+  connected: boolean;
+  totalClicks: number;
+  totalImpressions: number;
+  averageCtr: number;
+  averagePosition: number;
+  timeSeries: { date: string; clicks: number; impressions: number }[];
+  topQueries: GscQueryItem[];
+  topPages: GscPageItem[];
+}

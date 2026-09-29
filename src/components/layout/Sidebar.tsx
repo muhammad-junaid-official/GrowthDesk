@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 interface SidebarProps {
-  activeTab: 'site-explorer' | 'keyword-explorer' | 'site-audit' | 'settings';
+  activeTab: 'site-explorer' | 'keyword-explorer' | 'site-audit' | 'search-console' | 'settings';
   onTabChange: (tab: any) => void;
   onOpenAi: () => void;
 }
@@ -42,6 +42,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, onOpen
       description: 'Crawler & Core Web Vitals',
       icon: Activity,
       badge: '100%',
+    },
+    {
+      id: 'search-console',
+      label: 'Search Console',
+      description: '1st-Party Clicks, CTR & Pos',
+      icon: BarChart3,
+      badge: 'GSC',
     },
     {
       id: 'settings',
